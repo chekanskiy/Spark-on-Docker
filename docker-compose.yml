@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile
     command: bin/spark-class org.apache.spark.deploy.master.Master -h master
+#    --conf spark.jars=deequ-1.0.1.jar
     hostname: master
     environment:
       MASTER: spark://master:7077
@@ -13,10 +14,12 @@ services:
       SPARK_PUBLIC_DNS: localhost
     expose:
       - 7077
+      - 9999
     ports:
       - 4040:4040
       - 6066:6066
       - 7077:7077
+      - 9999:9999
     volumes:
       - ./conf/master:/conf
       - ./data:/tmp/data
@@ -26,6 +29,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
+#    --conf spark.jars=deequ-1.0.1.jar
     hostname: worker
     environment:
       SPARK_CONF_DIR: /conf
@@ -44,7 +48,7 @@ services:
 
   reverse-proxy:
     image: traefik
-    command: 
+    command:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"

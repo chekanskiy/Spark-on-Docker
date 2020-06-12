@@ -17,12 +17,21 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update \
- && apt-get install -y curl unzip \
+ && apt-get install -y curl unzip wget \
     python3 python3-setuptools \
  && ln -s /usr/bin/python3 /usr/bin/python \
  && easy_install3 pip py4j \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+# DEEQU
+RUN wget https://repo1.maven.org/maven2/com/amazon/deequ/deequ/1.0.2/deequ-1.0.2.jar && \
+    pip3 install jupyterlab
+RUN pip3 install spylon-kernel
+RUN python3 -m spylon_kernel install
+
+#Augment the PATH variable to launch Jupyter Notebook easily from anywhere.
+ENV PATH $PATH:~/.local/bin
 
 # http://blog.stuart.axelbrooke.com/python-3-on-spark-return-of-the-pythonhashseed
 ENV PYTHONHASHSEED 0
@@ -65,5 +74,13 @@ RUN curl -sL --retry 3 \
  && mv /usr/$SPARK_PACKAGE $SPARK_HOME \
  && chown -R root:root $SPARK_HOME
 
+ENV PYTHONPATH $SPARK_HOME/python:$PYTHONPATH
+ENV PYSPARK_DRIVER_PYTHON "jupyter"
+ENV PYSPARK_DRIVER_PYTHON_OPTS "notebook"
+ENV PYSPARK_PYTHON python3
+#ENV PATH $SPARK_HOME:$PATH:~/.local/bin:$JAVA_HOME/bin:$JAVA_HOME/jre/bin
+
+#COPY conf/spark-defaults.conf $SPARK_HOME/conf/spark-defaults.conf
+
 WORKDIR $SPARK_HOME
-CMD ["bin/spark-class", "org.apache.spark.deploy.master.Master"]
+CMD ["bin/spark-class", "org.apache.spark.deploy.master.Master", "--conf spark.jars=/deequ-1.0.2.jar"]

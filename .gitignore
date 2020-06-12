@@ -1,6 +1,7 @@
 # Files to ignore
 
-screenshot_ignore.png
-conf/
 .DS_Store
-build_images.sh
+.idea
+.ipynb_checkpoints
+data/
+venv/

@@ -1,0 +1,1 @@
+docker exec -it spark-on-docker_master_1 jupyter lab --ip=0.0.0.0 --port 9999 --allow-root --notebook-dir=/tmp/data
